@@ -1,0 +1,19 @@
+{
+  "name": "gossip",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:server": "pnpm --filter @gossip/server dev",
+    "dev:mobile": "pnpm --filter @gossip/mobile start",
+    "build:server": "pnpm --filter @gossip/server build",
+    "build:shared": "pnpm --filter @gossip/shared build",
+    "db:migrate": "pnpm --filter @gossip/server db:migrate",
+    "db:generate": "pnpm --filter @gossip/server db:generate",
+    "db:studio": "pnpm --filter @gossip/server db:studio",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
