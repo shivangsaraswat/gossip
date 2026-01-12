@@ -7,6 +7,7 @@ import {
     acceptFollowRequestSchema,
     rejectFollowRequestSchema,
     unfollowSchema,
+    cancelFollowRequestSchema,
 } from './follows.schema.js';
 
 const router: RouterType = Router();
@@ -22,6 +23,9 @@ router.post('/accept', validate(acceptFollowRequestSchema), followsController.ac
 
 // Reject follow request
 router.post('/reject', validate(rejectFollowRequestSchema), followsController.rejectRequest);
+
+// Cancel follow request (for sender)
+router.post('/cancel', validate(cancelFollowRequestSchema), followsController.cancelRequest);
 
 // Unfollow
 router.post('/unfollow', validate(unfollowSchema), followsController.unfollow);

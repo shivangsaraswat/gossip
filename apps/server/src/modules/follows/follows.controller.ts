@@ -5,6 +5,7 @@ import type {
     AcceptFollowRequestInput,
     RejectFollowRequestInput,
     UnfollowInput,
+    CancelFollowRequestInput,
 } from './follows.schema.js';
 
 export const followsController = {
@@ -67,6 +68,23 @@ export const followsController = {
         try {
             const userId = (req as Request & { userId: string }).userId;
             const result = await followsService.unfollow(userId, req.body.userId);
+            res.status(200).json({
+                success: true,
+                data: result,
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    async cancelRequest(
+        req: Request<object, object, CancelFollowRequestInput>,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        try {
+            const userId = (req as Request & { userId: string }).userId;
+            const result = await followsService.cancelFollowRequest(userId, req.body.userId);
             res.status(200).json({
                 success: true,
                 data: result,

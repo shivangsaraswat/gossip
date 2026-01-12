@@ -88,6 +88,22 @@ export function useFollows() {
         }
     }, []);
 
+    const cancelFollowRequest = useCallback(async (userId: string): Promise<boolean> => {
+        setActionLoading(userId);
+        setError(null);
+
+        try {
+            const response = await api.post('/api/follows/cancel', { userId });
+            return response.data.success;
+        } catch (err: any) {
+            const message = err.response?.data?.error || 'Failed to cancel request';
+            setError(message);
+            return false;
+        } finally {
+            setActionLoading(null);
+        }
+    }, []);
+
     const getRelationshipStatus = useCallback(async (userId: string): Promise<RelationshipStatus | null> => {
         try {
             const response = await api.get(`/api/follows/status/${userId}`);
@@ -126,6 +142,7 @@ export function useFollows() {
         acceptFollowRequest,
         rejectFollowRequest,
         unfollow,
+        cancelFollowRequest,
         getRelationshipStatus,
         fetchPendingRequests,
     };

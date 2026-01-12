@@ -189,6 +189,34 @@ export const followsService = {
     },
 
     /**
+     * Cancel a pending follow request (for the sender)
+     */
+    async cancelFollowRequest(senderId: string, receiverId: string): Promise<{ message: string }> {
+        if (senderId === receiverId) {
+            throw new FollowError('Cannot cancel request to yourself', 400);
+        }
+
+        const request = await prisma.followRequest.findUnique({
+            where: {
+                senderId_receiverId: {
+                    senderId,
+                    receiverId,
+                },
+            },
+        });
+
+        if (!request) {
+            throw new FollowError('No pending follow request found', 404);
+        }
+
+        await prisma.followRequest.delete({
+            where: { id: request.id },
+        });
+
+        return { message: 'Follow request cancelled' };
+    },
+
+    /**
      * Get relationship status with a user
      */
     async getStatus(currentUserId: string, targetUserId: string): Promise<{ relationship: RelationshipStatus }> {

@@ -30,6 +30,7 @@ export default function ExploreScreen() {
         pendingRequests,
         sendFollowRequest,
         acceptFollowRequest,
+        cancelFollowRequest,
         fetchPendingRequests,
     } = useFollows();
 
@@ -71,7 +72,7 @@ export default function ExploreScreen() {
 
     const handleFollowAction = useCallback(async (
         userId: string,
-        action: 'follow' | 'accept' | 'unfollow'
+        action: 'follow' | 'accept' | 'unfollow' | 'cancel'
     ) => {
         // Optimistic update
         setLocalUsers((prev) =>
@@ -81,6 +82,7 @@ export default function ExploreScreen() {
                 if (action === 'follow') newRelationship = 'request_sent';
                 if (action === 'accept') newRelationship = 'mutual';
                 if (action === 'unfollow') newRelationship = 'not_following';
+                if (action === 'cancel') newRelationship = 'not_following';
                 return { ...u, relationship: newRelationship };
             })
         );
@@ -94,13 +96,15 @@ export default function ExploreScreen() {
             if (request) {
                 success = await acceptFollowRequest(request.id);
             }
+        } else if (action === 'cancel') {
+            success = await cancelFollowRequest(userId);
         }
 
         // Revert on failure
         if (!success) {
             setLocalUsers(users);
         }
-    }, [sendFollowRequest, acceptFollowRequest, pendingRequests, users]);
+    }, [sendFollowRequest, acceptFollowRequest, cancelFollowRequest, pendingRequests, users]);
 
     const handleUserPress = useCallback((userId: string) => {
         router.push(`/(app)/profile/${userId}`);

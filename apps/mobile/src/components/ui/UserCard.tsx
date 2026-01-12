@@ -15,7 +15,7 @@ interface UserCardProps {
     displayName: string;
     relationship: RelationshipStatus;
     onPress?: () => void;
-    onFollowAction?: (action: 'follow' | 'accept' | 'unfollow') => void;
+    onFollowAction?: (action: 'follow' | 'accept' | 'unfollow' | 'cancel') => void;
     loading?: boolean;
 }
 
@@ -48,9 +48,12 @@ export function UserCard({
                 );
             case 'request_sent':
                 return (
-                    <View style={[styles.actionButton, styles.requestedButton]}>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.requestedButton]}
+                        onPress={() => onFollowAction?.('cancel')}
+                    >
                         <Text style={styles.requestedText}>Requested</Text>
-                    </View>
+                    </TouchableOpacity>
                 );
             case 'request_received':
                 return (
