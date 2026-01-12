@@ -30,6 +30,12 @@ model User {
   otpCodes OtpCode[]
   sessions Session[]
 
+  // Follow relationships
+  sentFollowRequests     FollowRequest[] @relation("SentRequests")
+  receivedFollowRequests FollowRequest[] @relation("ReceivedRequests")
+  following              Follow[]        @relation("Following")
+  followers              Follow[]        @relation("Followers")
+
   @@index([email])
   @@index([username])
   @@map("users")
@@ -65,4 +71,34 @@ model Session {
   @@index([userId])
   @@index([refreshToken])
   @@map("sessions")
+}
+
+model FollowRequest {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId])
+  @@index([senderId])
+  @@map("follow_requests")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
 }

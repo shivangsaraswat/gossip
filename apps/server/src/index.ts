@@ -4,6 +4,8 @@ import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { env } from './config/env.js';
 import { authRoutes } from './modules/auth/index.js';
+import { followsRoutes } from './modules/follows/index.js';
+import { usersRoutes } from './modules/users/index.js';
 import { errorHandler, notFoundHandler } from './middleware/index.js';
 
 const app: Express = express();
@@ -29,6 +31,8 @@ app.get('/health', (_req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/follows', followsRoutes);
+app.use('/api/users', usersRoutes);
 
 // Error handling
 app.use(notFoundHandler);

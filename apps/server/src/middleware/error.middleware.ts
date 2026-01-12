@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AuthError } from '../modules/auth/auth.service.js';
+import { FollowError } from '../modules/follows/follows.service.js';
 
 export interface ApiError extends Error {
     statusCode?: number;
@@ -15,6 +16,14 @@ export function errorHandler(
 
     // Handle known errors
     if (err instanceof AuthError) {
+        res.status(err.statusCode).json({
+            success: false,
+            error: err.message,
+        });
+        return;
+    }
+
+    if (err instanceof FollowError) {
         res.status(err.statusCode).json({
             success: false,
             error: err.message,
