@@ -1,40 +1,44 @@
 import React, { useState } from 'react';
 import {
     View,
-    TextInput,
+    TextInput as RNTextInput,
     Text,
     StyleSheet,
     ViewStyle,
-    TextInputProps,
+    TextInputProps as RNTextInputProps,
 } from 'react-native';
-import { colors, spacing, radius } from '../../theme';
+import { colors, spacing, radius, typography } from '../../theme';
 
-interface InputProps extends TextInputProps {
+interface TextInputProps extends RNTextInputProps {
+    /** Label above the input */
     label?: string;
+    /** Error message below the input */
     error?: string;
+    /** Hint text below the input */
     hint?: string;
-    success?: boolean;
+    /** Container style */
     containerStyle?: ViewStyle;
 }
 
 /**
- * Input (Legacy)
- * Text input with label, error, hint support - kept for backward compatibility
- * New code should prefer TextInput component
+ * TextInput
+ * Styled text input per spec:
+ * - Border radius: 12
+ * - Soft border: border color
+ * - Focus border: primary color
+ * - Error state supported
  */
-export function Input({
+export function TextInput({
     label,
     error,
     hint,
-    success,
     containerStyle,
     ...props
-}: InputProps) {
+}: TextInputProps) {
     const [isFocused, setIsFocused] = useState(false);
 
     const getBorderColor = () => {
         if (error) return colors.error;
-        if (success) return colors.success;
         if (isFocused) return colors.primary;
         return colors.border;
     };
@@ -42,7 +46,7 @@ export function Input({
     return (
         <View style={[styles.container, containerStyle]}>
             {label && <Text style={styles.label}>{label}</Text>}
-            <TextInput
+            <RNTextInput
                 {...props}
                 style={[
                     styles.input,
@@ -70,9 +74,10 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     label: {
-        fontSize: 14,
+        fontSize: typography.meta,
         color: colors.textSecondary,
         marginBottom: spacing.xs,
+        fontWeight: '500',
     },
     input: {
         backgroundColor: colors.surface,
@@ -80,16 +85,16 @@ const styles = StyleSheet.create({
         borderRadius: radius.md,
         paddingVertical: spacing.md,
         paddingHorizontal: spacing.md,
-        fontSize: 15,
+        fontSize: typography.body,
         color: colors.textPrimary,
     },
     error: {
-        fontSize: 12,
+        fontSize: typography.meta,
         color: colors.error,
         marginTop: spacing.xs,
     },
     hint: {
-        fontSize: 12,
+        fontSize: typography.meta,
         color: colors.textMuted,
         marginTop: spacing.xs,
     },

@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../src/store';
+import { colors } from '../src/theme';
 
 /**
  * Session Resolver (Index Route)
@@ -20,7 +20,7 @@ export default function SessionResolver() {
     if (status === 'loading') {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="#007AFF" />
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#000',
+        backgroundColor: colors.background,
     },
 });

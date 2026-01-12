@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Button, OtpInput } from '../../src/components/ui';
+import { ScreenContainer } from '../../src/components/layout';
+import { PrimaryButton } from '../../src/components/ui';
+import { AuthTitle, OTPInput } from '../../src/components/auth';
 import { useAuth } from '../../src/hooks';
-import { colors, spacing, typography } from '../../src/theme';
+import { colors, spacing, radius, typography } from '../../src/theme';
 
 const RESEND_COOLDOWN = 60; // seconds
 
 /**
  * OTP Verification Screen
  * Converts pending user to active user
+ * 
+ * Composition:
+ * - ScreenContainer
+ * - AuthTitle
+ * - OTPInput component
+ * - PrimaryButton
  */
 export default function OtpScreen() {
     const { email } = useLocalSearchParams<{ email: string }>();
@@ -51,6 +53,11 @@ export default function OtpScreen() {
         }
     };
 
+    const handleOtpComplete = (completedCode: string) => {
+        setCode(completedCode);
+        // Auto-verify handled by useEffect
+    };
+
     // Auto-submit when code is complete
     useEffect(() => {
         if (code.length === 6) {
@@ -59,15 +66,14 @@ export default function OtpScreen() {
     }, [code]);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <ScreenContainer>
             <View style={styles.content}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Verify Your Email</Text>
-                    <Text style={styles.subtitle}>
-                        We sent a 6-digit code to
-                    </Text>
-                    <Text style={styles.email}>{email}</Text>
-                </View>
+                <AuthTitle
+                    title="Verify Your Email"
+                    subtitle={`We sent a 6-digit code to`}
+                    centered
+                />
+                <Text style={styles.email}>{email}</Text>
 
                 {error && (
                     <View style={styles.errorBanner}>
@@ -76,8 +82,9 @@ export default function OtpScreen() {
                 )}
 
                 <View style={styles.otpContainer}>
-                    <OtpInput
-                        value={code}
+                    <OTPInput
+                        length={6}
+                        onComplete={handleOtpComplete}
                         onChange={setCode}
                         error={!!error}
                     />
@@ -97,55 +104,39 @@ export default function OtpScreen() {
             </View>
 
             <View style={styles.actions}>
-                <Button
+                <PrimaryButton
                     title="Verify"
                     onPress={handleVerify}
                     disabled={code.length !== 6}
                     loading={loading}
                 />
             </View>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-    },
     content: {
         flex: 1,
-        paddingHorizontal: spacing.xl,
-    },
-    header: {
-        marginTop: spacing.xxl,
-        marginBottom: spacing.xl,
         alignItems: 'center',
-    },
-    title: {
-        ...typography.h1,
-        color: colors.text,
-        marginBottom: spacing.md,
-    },
-    subtitle: {
-        ...typography.body,
-        color: colors.textSecondary,
     },
     email: {
-        ...typography.body,
+        fontSize: typography.body,
         fontWeight: '600',
-        color: colors.text,
-        marginTop: spacing.xs,
+        color: colors.textPrimary,
+        marginTop: -spacing.md,
+        marginBottom: spacing.lg,
     },
     errorBanner: {
-        backgroundColor: colors.error + '20',
+        backgroundColor: colors.error + '15',
         padding: spacing.md,
-        borderRadius: 8,
+        borderRadius: radius.md,
         marginBottom: spacing.lg,
         alignItems: 'center',
+        width: '100%',
     },
     errorText: {
-        ...typography.bodySmall,
+        fontSize: typography.meta,
         color: colors.error,
     },
     otpContainer: {
@@ -156,15 +147,15 @@ const styles = StyleSheet.create({
         marginTop: spacing.lg,
     },
     resendText: {
-        ...typography.body,
+        fontSize: typography.body,
         color: colors.primary,
+        fontWeight: '500',
     },
     cooldownText: {
-        ...typography.body,
+        fontSize: typography.body,
         color: colors.textMuted,
     },
     actions: {
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.xxl,
+        paddingBottom: spacing.xl,
     },
 });

@@ -6,16 +6,26 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Input } from '../../src/components/ui';
+import { useRouter } from 'expo-router';
+import { ScreenContainer } from '../../src/components/layout';
+import { PrimaryButton, TextInput } from '../../src/components/ui';
+import { AuthTitle, AuthFooter } from '../../src/components/auth';
 import { useAuth } from '../../src/hooks';
-import { colors, spacing, typography } from '../../src/theme';
+import { colors, spacing, radius } from '../../src/theme';
 
 /**
  * Login Screen
  * Authenticates existing users
+ * 
+ * Composition:
+ * - ScreenContainer
+ * - AuthTitle
+ * - TextInput stack
+ * - PrimaryButton
+ * - AuthFooter
  */
 export default function LoginScreen() {
+    const router = useRouter();
     const { loading, error, login, clearError } = useAuth();
 
     const [identifier, setIdentifier] = useState('');
@@ -51,18 +61,16 @@ export default function LoginScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <ScreenContainer>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
                 <View style={styles.content}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Welcome Back</Text>
-                        <Text style={styles.subtitle}>
-                            Log in to continue
-                        </Text>
-                    </View>
+                    <AuthTitle
+                        title="Welcome Back"
+                        subtitle="Log in to continue"
+                    />
 
                     {error && (
                         <View style={styles.errorBanner}>
@@ -71,7 +79,7 @@ export default function LoginScreen() {
                     )}
 
                     <View style={styles.form}>
-                        <Input
+                        <TextInput
                             label="Email or Username"
                             placeholder="you@example.com"
                             value={identifier}
@@ -82,7 +90,7 @@ export default function LoginScreen() {
                             autoCorrect={false}
                         />
 
-                        <Input
+                        <TextInput
                             label="Password"
                             placeholder="Enter your password"
                             value={password}
@@ -95,58 +103,45 @@ export default function LoginScreen() {
                 </View>
 
                 <View style={styles.actions}>
-                    <Button
+                    <PrimaryButton
                         title="Log In"
                         onPress={handleSubmit}
                         disabled={!isValid}
                         loading={loading}
                     />
+
+                    <AuthFooter
+                        question="Don't have an account?"
+                        linkText="Sign up"
+                        onLinkPress={() => router.push('/(auth)/signup' as any)}
+                    />
                 </View>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-    },
     keyboardView: {
         flex: 1,
     },
     content: {
         flex: 1,
-        paddingHorizontal: spacing.xl,
-    },
-    header: {
-        marginTop: spacing.xl,
-        marginBottom: spacing.lg,
-    },
-    title: {
-        ...typography.h1,
-        color: colors.text,
-        marginBottom: spacing.xs,
-    },
-    subtitle: {
-        ...typography.body,
-        color: colors.textSecondary,
     },
     errorBanner: {
-        backgroundColor: colors.error + '20',
+        backgroundColor: colors.error + '15',
         padding: spacing.md,
-        borderRadius: 8,
+        borderRadius: radius.md,
         marginBottom: spacing.md,
     },
     errorText: {
-        ...typography.bodySmall,
+        fontSize: 14,
         color: colors.error,
     },
     form: {
         marginBottom: spacing.lg,
     },
     actions: {
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.xxl,
+        paddingBottom: spacing.xl,
     },
 });

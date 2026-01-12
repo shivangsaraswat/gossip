@@ -35,14 +35,15 @@ export default function RootLayout() {
             // Redirect to OTP verification
             router.replace('/(auth)/otp');
         } else if (status === 'active' && !inAppGroup) {
-            // Redirect to main app
-            router.replace('/(app)/explore');
+            // Redirect to main app (chat list)
+            router.replace('/(app)' as any);
         }
     }, [status, segments, router]);
 
     return (
         <>
-            <StatusBar style="light" />
+            {/* Light status bar for light theme */}
+            <StatusBar style="dark" />
             <Slot />
         </>
     );

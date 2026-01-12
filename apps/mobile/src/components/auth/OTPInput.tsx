@@ -6,33 +6,34 @@ import {
     NativeSyntheticEvent,
     TextInputKeyPressEventData,
 } from 'react-native';
-import { colors, spacing, radius } from '../../theme';
+import { colors, spacing, radius, typography } from '../../theme';
 
-interface OtpInputProps {
-    /** Code value */
-    value?: string;
-    /** Callback when code changes */
-    onChange?: (code: string) => void;
+interface OTPInputProps {
     /** Number of digits */
     length?: number;
+    /** Callback when all digits are entered */
+    onComplete?: (code: string) => void;
+    /** Callback on code change */
+    onChange?: (code: string) => void;
     /** Error state */
     error?: boolean;
 }
 
 /**
- * OtpInput (Legacy)
- * 6-digit OTP input - kept for backward compatibility
- * New code should use the auth/OTPInput component
+ * OTPInput
+ * 6-box OTP input with auto-advance:
+ * - Center aligned
+ * - Fixed width boxes
+ * - Auto-advance on input
+ * - Backspace handling
  */
-export function OtpInput({
-    value = '',
-    onChange,
+export function OTPInput({
     length = 6,
+    onComplete,
+    onChange,
     error = false,
-}: OtpInputProps) {
-    const [values, setValues] = useState<string[]>(
-        value ? value.split('').slice(0, length) : Array(length).fill('')
-    );
+}: OTPInputProps) {
+    const [values, setValues] = useState<string[]>(Array(length).fill(''));
     const inputRefs = useRef<(TextInput | null)[]>([]);
 
     const handleChange = (text: string, index: number) => {
@@ -44,9 +45,14 @@ export function OtpInput({
         const code = newValues.join('');
         onChange?.(code);
 
-        // Auto-advance
+        // Auto-advance to next input
         if (digit && index < length - 1) {
             inputRefs.current[index + 1]?.focus();
+        }
+
+        // Check completion
+        if (code.length === length && !code.includes('')) {
+            onComplete?.(code);
         }
     };
 
@@ -78,6 +84,7 @@ export function OtpInput({
                     keyboardType="number-pad"
                     maxLength={1}
                     textContentType="oneTimeCode"
+                    autoComplete="one-time-code"
                 />
             ))}
         </View>
@@ -98,7 +105,7 @@ const styles = StyleSheet.create({
         borderRadius: radius.md,
         backgroundColor: colors.surface,
         textAlign: 'center',
-        fontSize: 22,
+        fontSize: typography.title,
         fontWeight: '600',
         color: colors.textPrimary,
     },

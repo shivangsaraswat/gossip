@@ -7,7 +7,7 @@ import {
     ViewStyle,
     TextStyle,
 } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { colors, spacing, radius } from '../../theme';
 
 interface ButtonProps {
     title: string;
@@ -18,6 +18,11 @@ interface ButtonProps {
     style?: ViewStyle;
 }
 
+/**
+ * Button (Legacy)
+ * Multi-variant button component - kept for backward compatibility
+ * New code should prefer PrimaryButton/SecondaryButton
+ */
 export function Button({
     title,
     onPress,
@@ -42,7 +47,7 @@ export function Button({
         >
             {loading ? (
                 <ActivityIndicator
-                    color={variant === 'outline' ? colors.primary : colors.text}
+                    color={variant === 'outline' ? colors.primary : colors.white}
                     size="small"
                 />
             ) : (
@@ -58,7 +63,7 @@ const styles = StyleSheet.create({
     base: {
         paddingVertical: spacing.md,
         paddingHorizontal: spacing.lg,
-        borderRadius: borderRadius.lg,
+        borderRadius: radius.lg,
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 52,
@@ -67,7 +72,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primary,
     },
     secondary: {
-        backgroundColor: colors.surfaceLight,
+        backgroundColor: colors.surfaceSecondary,
     },
     outline: {
         backgroundColor: 'transparent',
@@ -78,17 +83,17 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     text: {
-        ...typography.body,
+        fontSize: 15,
         fontWeight: '600',
-        color: colors.text,
+        color: colors.white,
     },
     primaryText: {
-        color: colors.text,
+        color: colors.white,
     },
     secondaryText: {
-        color: colors.text,
+        color: colors.textPrimary,
     },
     outlineText: {
-        color: colors.text,
+        color: colors.textPrimary,
     },
 });

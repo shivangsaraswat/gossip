@@ -1,192 +1,142 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Avatar } from './Avatar';
+import { colors, spacing, radius, typography } from '../../theme';
 
-export type RelationshipStatus =
-    | 'not_following'
-    | 'request_sent'
-    | 'request_received'
-    | 'following'
-    | 'mutual';
+type RelationshipStatus = 'not_following' | 'request_sent' | 'request_received' | 'following' | 'mutual';
 
 interface UserCardProps {
     id: string;
     username: string;
-    displayName: string;
+    displayName?: string;
+    avatarUrl?: string;
     relationship: RelationshipStatus;
     onPress?: () => void;
     onFollowAction?: (action: 'follow' | 'accept' | 'unfollow' | 'cancel') => void;
     loading?: boolean;
 }
 
+/**
+ * UserCard Component
+ * Displays user info with follow/accept action button
+ */
 export function UserCard({
     username,
     displayName,
+    avatarUrl,
     relationship,
     onPress,
     onFollowAction,
     loading,
 }: UserCardProps) {
-    const getActionButton = () => {
-        if (loading) {
-            return (
-                <View style={[styles.actionButton, styles.loadingButton]}>
-                    <Text style={styles.actionText}>...</Text>
-                </View>
-            );
-        }
+    const initials = (displayName || username)
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
 
+    const getButtonConfig = () => {
         switch (relationship) {
             case 'not_following':
-                return (
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.followButton]}
-                        onPress={() => onFollowAction?.('follow')}
-                    >
-                        <Text style={styles.actionText}>Follow</Text>
-                    </TouchableOpacity>
-                );
+                return { label: 'Follow', action: 'follow' as const, variant: 'primary' };
             case 'request_sent':
-                return (
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.requestedButton]}
-                        onPress={() => onFollowAction?.('cancel')}
-                    >
-                        <Text style={styles.requestedText}>Requested</Text>
-                    </TouchableOpacity>
-                );
+                return { label: 'Requested', action: 'cancel' as const, variant: 'secondary' };
             case 'request_received':
-                return (
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.acceptButton]}
-                        onPress={() => onFollowAction?.('accept')}
-                    >
-                        <Text style={styles.actionText}>Accept</Text>
-                    </TouchableOpacity>
-                );
+                return { label: 'Accept', action: 'accept' as const, variant: 'primary' };
             case 'following':
-                return (
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.followingButton]}
-                        onPress={() => onFollowAction?.('unfollow')}
-                    >
-                        <Text style={styles.followingText}>Following</Text>
-                    </TouchableOpacity>
-                );
             case 'mutual':
-                return (
-                    <View style={[styles.actionButton, styles.mutualButton]}>
-                        <Text style={styles.mutualText}>Mutual</Text>
-                    </View>
-                );
+                return { label: 'Following', action: 'unfollow' as const, variant: 'secondary' };
             default:
-                return null;
+                return { label: 'Follow', action: 'follow' as const, variant: 'primary' };
         }
     };
 
+    const buttonConfig = getButtonConfig();
+
     return (
-        <TouchableOpacity
-            style={styles.container}
-            onPress={onPress}
-            activeOpacity={0.7}
-        >
-            <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                    {displayName.charAt(0).toUpperCase()}
-                </Text>
-            </View>
+        <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+            <Avatar source={avatarUrl} initials={initials} size="md" />
+
             <View style={styles.info}>
                 <Text style={styles.displayName} numberOfLines={1}>
-                    {displayName}
+                    {displayName || username}
                 </Text>
                 <Text style={styles.username} numberOfLines={1}>
                     @{username}
                 </Text>
             </View>
-            {getActionButton()}
+
+            <TouchableOpacity
+                style={[
+                    styles.actionButton,
+                    buttonConfig.variant === 'primary' ? styles.primaryButton : styles.secondaryButton,
+                ]}
+                onPress={() => onFollowAction?.(buttonConfig.action)}
+                disabled={loading}
+            >
+                {loading ? (
+                    <ActivityIndicator size="small" color={buttonConfig.variant === 'primary' ? colors.white : colors.primary} />
+                ) : (
+                    <Text style={[
+                        styles.actionText,
+                        buttonConfig.variant === 'primary' ? styles.primaryText : styles.secondaryText,
+                    ]}>
+                        {buttonConfig.label}
+                    </Text>
+                )}
+            </TouchableOpacity>
         </TouchableOpacity>
     );
 }
+
+export type { RelationshipStatus };
 
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: spacing.md,
-        backgroundColor: colors.surface,
-        borderRadius: borderRadius.lg,
-        marginBottom: spacing.sm,
-    },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.surfaceLight,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: spacing.md,
-    },
-    avatarText: {
-        ...typography.h3,
-        color: colors.textSecondary,
+        paddingVertical: spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
     },
     info: {
         flex: 1,
+        marginLeft: spacing.md,
     },
     displayName: {
-        ...typography.body,
+        fontSize: typography.body,
         fontWeight: '600',
-        color: colors.text,
+        color: colors.textPrimary,
     },
     username: {
-        ...typography.bodySmall,
+        fontSize: typography.meta,
         color: colors.textSecondary,
+        marginTop: 2,
     },
     actionButton: {
-        paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
-        borderRadius: borderRadius.md,
-        minWidth: 80,
+        paddingVertical: spacing.sm,
+        borderRadius: radius.full,
+        minWidth: 90,
         alignItems: 'center',
     },
-    followButton: {
+    primaryButton: {
         backgroundColor: colors.primary,
     },
-    requestedButton: {
-        backgroundColor: colors.surfaceLight,
+    secondaryButton: {
+        backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
-    },
-    acceptButton: {
-        backgroundColor: colors.success,
-    },
-    followingButton: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    mutualButton: {
-        backgroundColor: colors.primaryDark,
-    },
-    loadingButton: {
-        backgroundColor: colors.surfaceLight,
     },
     actionText: {
-        ...typography.bodySmall,
+        fontSize: typography.meta,
         fontWeight: '600',
-        color: colors.text,
     },
-    requestedText: {
-        ...typography.bodySmall,
-        color: colors.textSecondary,
+    primaryText: {
+        color: colors.white,
     },
-    followingText: {
-        ...typography.bodySmall,
-        color: colors.textSecondary,
-    },
-    mutualText: {
-        ...typography.bodySmall,
-        fontWeight: '600',
-        color: colors.text,
+    secondaryText: {
+        color: colors.primary,
     },
 });

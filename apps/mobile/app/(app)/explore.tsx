@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import { UserCard, type RelationshipStatus } from '../../src/components/ui';
 import { useUsers, useFollows, type SearchUser } from '../../src/hooks';
 import { useAuthStore } from '../../src/store';
-import { colors, spacing, borderRadius, typography } from '../../src/theme';
+import { colors, spacing, radius, typography } from '../../src/theme';
 
 /**
  * Explore Members Screen
@@ -250,18 +250,18 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         backgroundColor: colors.surface,
-        borderRadius: borderRadius.lg,
+        borderRadius: radius.lg,
         paddingVertical: spacing.md,
         paddingHorizontal: spacing.lg,
-        ...typography.body,
-        color: colors.text,
+        ...typography.styles.body,
+        color: colors.textPrimary,
     },
     pendingBanner: {
-        backgroundColor: colors.primary + '20',
+        backgroundColor: colors.primarySoft,
         marginHorizontal: spacing.lg,
         marginBottom: spacing.md,
         padding: spacing.md,
-        borderRadius: borderRadius.md,
+        borderRadius: radius.md,
     },
     pendingText: {
         ...typography.bodySmall,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
     },
     emptyText: {
-        ...typography.body,
+        ...typography.styles.body,
         color: colors.textSecondary,
         textAlign: 'center',
     },

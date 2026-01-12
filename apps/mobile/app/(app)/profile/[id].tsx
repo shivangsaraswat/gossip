@@ -11,7 +11,7 @@ import { Button } from '../../../src/components/ui';
 import type { RelationshipStatus } from '../../../src/components/ui/UserCard';
 import { useFollows } from '../../../src/hooks';
 import { api } from '../../../src/lib/api';
-import { colors, spacing, borderRadius, typography } from '../../../src/theme';
+import { colors, spacing, radius, typography } from '../../../src/theme';
 
 interface UserProfile {
     id: string;
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.md,
     },
     backButton: {
-        ...typography.body,
+        ...typography.styles.body,
         color: colors.primary,
     },
     loadingContainer: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     loadingText: {
-        ...typography.body,
+        ...typography.styles.body,
         color: colors.textSecondary,
     },
     errorContainer: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
         gap: spacing.lg,
     },
     errorText: {
-        ...typography.body,
+        ...typography.styles.body,
         color: colors.error,
         textAlign: 'center',
     },
@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
     avatar: {
         width: 100,
         height: 100,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.surfaceLight,
+        borderRadius: radius.full,
+        backgroundColor: colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: spacing.lg,
@@ -240,19 +240,19 @@ const styles = StyleSheet.create({
     },
     displayName: {
         ...typography.h2,
-        color: colors.text,
+        color: colors.textPrimary,
         marginBottom: spacing.xs,
     },
     username: {
-        ...typography.body,
+        ...typography.styles.body,
         color: colors.textSecondary,
     },
     mutualBadge: {
         marginTop: spacing.lg,
-        backgroundColor: colors.primaryDark + '30',
+        backgroundColor: colors.primarySoft,
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.lg,
-        borderRadius: borderRadius.full,
+        borderRadius: radius.full,
     },
     mutualText: {
         ...typography.bodySmall,
