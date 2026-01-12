@@ -36,13 +36,13 @@ export default function RootLayout() {
             router.replace('/(auth)/otp');
         } else if (status === 'active' && !inAppGroup) {
             // Redirect to main app
-            router.replace('/(app)/home');
+            router.replace('/(app)/explore');
         }
     }, [status, segments, router]);
 
     return (
         <>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
             <Slot />
         </>
     );
