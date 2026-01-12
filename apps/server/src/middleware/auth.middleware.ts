@@ -40,3 +40,32 @@ export function authenticate(
         });
     }
 }
+
+export interface OptionalAuthRequest extends Request {
+    userId?: string;
+}
+
+export function optionalAuthenticate(
+    req: Request,
+    _res: Response,
+    next: NextFunction
+): void {
+    try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            // No token provided - continue without userId
+            next();
+            return;
+        }
+
+        const token = authHeader.substring(7);
+        const { userId } = authService.verifyAccessToken(token);
+
+        (req as OptionalAuthRequest).userId = userId;
+        next();
+    } catch {
+        // Token invalid or expired - continue without userId
+        next();
+    }
+}

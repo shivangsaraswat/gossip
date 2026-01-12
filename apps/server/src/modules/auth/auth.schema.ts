@@ -40,9 +40,19 @@ export const refreshTokenSchema = z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
+export const usernameAvailableSchema = z.object({
+    username: z
+        .string()
+        .min(3, 'Username must be at least 3 characters')
+        .max(30, 'Username must be at most 30 characters')
+        .regex(/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores')
+        .transform((val) => val.toLowerCase()),
+});
+
 // Type exports
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+export type UsernameAvailableInput = z.infer<typeof usernameAvailableSchema>;

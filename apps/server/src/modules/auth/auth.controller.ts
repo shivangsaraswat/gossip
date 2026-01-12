@@ -120,4 +120,51 @@ export const authController = {
             next(error);
         }
     },
+
+    async usernameAvailable(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        try {
+            const username = req.query.username as string;
+
+            if (!username) {
+                res.status(400).json({
+                    error: 'Username query parameter is required',
+                });
+                return;
+            }
+
+            // Validate username format
+            const usernameRegex = /^[a-z0-9_]{3,30}$/;
+            const normalizedUsername = username.toLowerCase();
+
+            if (!usernameRegex.test(normalizedUsername)) {
+                res.status(400).json({
+                    error: 'Username must be 3-30 characters, lowercase letters, numbers, and underscores only',
+                });
+                return;
+            }
+
+            const result = await authService.checkUsernameAvailable(normalizedUsername);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    async sessionStatus(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        try {
+            const userId = (req as Request & { userId?: string }).userId;
+            const result = await authService.getSessionStatus(userId);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
 };

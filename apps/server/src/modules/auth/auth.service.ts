@@ -320,6 +320,49 @@ export const authService = {
             throw new AuthError('Invalid access token', 401);
         }
     },
+
+    async checkUsernameAvailable(username: string): Promise<{ available: boolean }> {
+        const normalizedUsername = username.toLowerCase();
+
+        const existingUser = await prisma.user.findUnique({
+            where: { username: normalizedUsername },
+            select: { id: true },
+        });
+
+        return { available: !existingUser };
+    },
+
+    async getSessionStatus(userId?: string): Promise<{
+        authenticated: boolean;
+        status?: string;
+        user?: Partial<SafeUser>;
+    }> {
+        if (!userId) {
+            return { authenticated: false };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            return { authenticated: false };
+        }
+
+        if (user.status === 'PENDING_VERIFICATION') {
+            return {
+                authenticated: true,
+                status: 'PENDING_VERIFICATION',
+                user: { email: user.email },
+            };
+        }
+
+        return {
+            authenticated: true,
+            status: user.status,
+            user: toSafeUser(user),
+        };
+    },
 };
 
 async function createSession(userId: string, deviceInfo?: string, ipAddress?: string): Promise<AuthTokens> {

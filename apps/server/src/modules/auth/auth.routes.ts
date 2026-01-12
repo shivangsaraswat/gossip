@@ -1,7 +1,7 @@
 import { Router, type Router as RouterType } from 'express';
 import { authController } from './auth.controller.js';
 import { validate } from '../../middleware/validate.middleware.js';
-import { authenticate } from '../../middleware/auth.middleware.js';
+import { authenticate, optionalAuthenticate } from '../../middleware/auth.middleware.js';
 import {
     registerSchema,
     loginSchema,
@@ -19,6 +19,12 @@ router.post('/resend-otp', validate(resendOtpSchema), authController.resendOtp);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
 router.post('/logout', validate(refreshTokenSchema), authController.logout);
+
+// Username availability check (public)
+router.get('/username-available', authController.usernameAvailable);
+
+// Session status (optional auth)
+router.get('/session', optionalAuthenticate, authController.sessionStatus);
 
 // Protected routes
 router.get('/me', authenticate, authController.me);
