@@ -3,9 +3,9 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '../../../src/components/ui';
 import type { RelationshipStatus } from '../../../src/components/ui/UserCard';

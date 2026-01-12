@@ -96,8 +96,15 @@ export const authService = {
                 },
             });
 
-            // Send verification email
-            await emailService.sendVerificationEmail(input.email, otpCode, input.displayName);
+            // In development, log OTP to console for testing
+            if (env.NODE_ENV === 'development') {
+                console.log('═══════════════════════════════════════');
+                console.log(`📧 OTP for ${input.email}: ${otpCode}`);
+                console.log('═══════════════════════════════════════');
+            } else {
+                // Send verification email in production
+                await emailService.sendVerificationEmail(input.email, otpCode, input.displayName);
+            }
 
             return newUser;
         });
@@ -202,7 +209,14 @@ export const authService = {
             },
         });
 
-        await emailService.sendVerificationEmail(email, otpCode, user.displayName);
+        // In development, log OTP to console for testing
+        if (env.NODE_ENV === 'development') {
+            console.log('═══════════════════════════════════════');
+            console.log(`📧 RESEND OTP for ${email}: ${otpCode}`);
+            console.log('═══════════════════════════════════════');
+        } else {
+            await emailService.sendVerificationEmail(email, otpCode, user.displayName);
+        }
 
         return { message: 'If an account exists, a verification code has been sent.' };
     },

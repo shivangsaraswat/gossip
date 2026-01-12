@@ -3,10 +3,10 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Input } from '../../src/components/ui';
 import { useAuth } from '../../src/hooks';
 import { colors, spacing, typography } from '../../src/theme';

@@ -3,9 +3,9 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { Button, OtpInput } from '../../src/components/ui';
 import { useAuth } from '../../src/hooks';
