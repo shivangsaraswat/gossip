@@ -35,8 +35,8 @@ export default function RootLayout() {
             // Redirect to OTP verification
             router.replace('/(auth)/otp');
         } else if (status === 'active' && !inAppGroup) {
-            // Redirect to main app
-            router.replace('/(app)/explore');
+            // Redirect to main app (chat list)
+            router.replace('/(app)/(tabs)/chats');
         }
     }, [status, segments, router]);
 
