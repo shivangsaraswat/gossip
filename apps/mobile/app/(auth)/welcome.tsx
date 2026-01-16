@@ -1,54 +1,57 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Button } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { useRouter, useRootNavigationState } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { GossipLogo, GradientBackground } from '../../src/components/ui';
+import { spacing, typography, colors } from '../../src/theme';
 
 /**
- * Welcome Screen
- * Entry point for unauthenticated users
+ * Splash / Welcome Screen
+ * Screen 1 - Clean, calm first impression
+ * 
+ * Features:
+ * - Light blue to white gradient background
+ * - Centered infinity-fish logo
+ * - App name "Gossip" below logo
+ * - Auto-navigates to login after delay
  */
 export default function WelcomeScreen() {
     const router = useRouter();
+    const rootNavigationState = useRootNavigationState();
+    const [hasNavigated, setHasNavigated] = useState(false);
+
+    // Wait for navigation to be ready before navigating
+    useEffect(() => {
+        if (!rootNavigationState?.key || hasNavigated) return;
+
+        const timer = setTimeout(() => {
+            setHasNavigated(true);
+            router.replace('/(auth)/login');
+        }, 2500);
+
+        return () => clearTimeout(timer);
+    }, [rootNavigationState?.key, hasNavigated, router]);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                {/* Logo Area */}
-                <View style={styles.logoContainer}>
-                    <View style={styles.logo}>
-                        <Text style={styles.logoText}>G</Text>
+        <GradientBackground>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.content}>
+                    {/* Logo */}
+                    <View style={styles.logoContainer}>
+                        <GossipLogo size={120} />
                     </View>
-                    <Text style={styles.title}>Gossip</Text>
+
+                    {/* App Name */}
+                    <Text style={styles.appName}>Gossip</Text>
                 </View>
-
-                {/* Value Statement */}
-                <Text style={styles.tagline}>
-                    Connect with people who matter
-                </Text>
-            </View>
-
-            {/* CTAs */}
-            <View style={styles.actions}>
-                <Button
-                    title="Create Account"
-                    onPress={() => router.push('/(auth)/register')}
-                />
-                <View style={styles.spacer} />
-                <Button
-                    title="Log In"
-                    variant="outline"
-                    onPress={() => router.push('/(auth)/login')}
-                />
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </GradientBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
         flex: 1,
-        backgroundColor: colors.background,
     },
     content: {
         flex: 1,
@@ -57,37 +60,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.xl,
     },
     logoContainer: {
-        alignItems: 'center',
-        marginBottom: spacing.xl,
+        marginBottom: spacing.lg,
     },
-    logo: {
-        width: 80,
-        height: 80,
-        borderRadius: 20,
-        backgroundColor: colors.primary,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: spacing.md,
-    },
-    logoText: {
-        ...typography.h1,
-        fontSize: 40,
+    appName: {
+        ...typography.display,
+        fontSize: 32,
         color: colors.text,
-    },
-    title: {
-        ...typography.h1,
-        color: colors.text,
-    },
-    tagline: {
-        ...typography.body,
-        color: colors.textSecondary,
-        textAlign: 'center',
-    },
-    actions: {
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.xxl,
-    },
-    spacer: {
-        height: spacing.md,
+        letterSpacing: 1,
     },
 });

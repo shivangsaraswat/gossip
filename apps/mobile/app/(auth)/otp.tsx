@@ -7,15 +7,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { Button, OtpInput } from '../../src/components/ui';
+import { Button, OtpInput, GossipLogo, GradientBackground } from '../../src/components/ui';
 import { useAuth } from '../../src/hooks';
-import { colors, spacing, typography } from '../../src/theme';
+import { colors, spacing, typography, borderRadius } from '../../src/theme';
 
 const RESEND_COOLDOWN = 60; // seconds
 
 /**
  * OTP Verification Screen
- * Converts pending user to active user
+ * Screen 5 - Verify email with 6-digit code
+ * 
+ * Features:
+ * - Gradient background
+ * - Logo at top center
+ * - "Verify your account" title
+ * - Subtitle with email info
+ * - 6 OTP input boxes (equal width, rounded, centered)
+ * - "Verify" primary button
+ * - "Didn't receive the code? Resend" link
  */
 export default function OtpScreen() {
     const { email } = useLocalSearchParams<{ email: string }>();
@@ -59,77 +68,101 @@ export default function OtpScreen() {
     }, [code]);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Verify Your Email</Text>
-                    <Text style={styles.subtitle}>
-                        We sent a 6-digit code to
-                    </Text>
-                    <Text style={styles.email}>{email}</Text>
-                </View>
-
-                {error && (
-                    <View style={styles.errorBanner}>
-                        <Text style={styles.errorText}>{error}</Text>
+        <GradientBackground>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.content}>
+                    {/* Logo */}
+                    <View style={styles.logoContainer}>
+                        <GossipLogo size={60} />
                     </View>
-                )}
 
-                <View style={styles.otpContainer}>
-                    <OtpInput
-                        value={code}
-                        onChange={setCode}
-                        error={!!error}
-                    />
-                </View>
-
-                <View style={styles.resendContainer}>
-                    {resendCooldown > 0 ? (
-                        <Text style={styles.cooldownText}>
-                            Resend code in {resendCooldown}s
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Verify your account</Text>
+                        <Text style={styles.subtitle}>
+                            Enter the 6-digit code sent to your email
                         </Text>
-                    ) : (
-                        <TouchableOpacity onPress={handleResend} disabled={loading}>
-                            <Text style={styles.resendText}>Resend Code</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </View>
+                        {email && (
+                            <Text style={styles.email}>{email}</Text>
+                        )}
+                    </View>
 
-            <View style={styles.actions}>
-                <Button
-                    title="Verify"
-                    onPress={handleVerify}
-                    disabled={code.length !== 6}
-                    loading={loading}
-                />
-            </View>
-        </SafeAreaView>
+                    {/* Error Banner */}
+                    {error && (
+                        <View style={styles.errorBanner}>
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    )}
+
+                    {/* OTP Input */}
+                    <View style={styles.otpContainer}>
+                        <OtpInput
+                            value={code}
+                            onChange={setCode}
+                            error={!!error}
+                        />
+                    </View>
+
+                    {/* Verify Button */}
+                    <View style={styles.actions}>
+                        <Button
+                            title="Verify"
+                            onPress={handleVerify}
+                            disabled={code.length !== 6}
+                            loading={loading}
+                        />
+                    </View>
+
+                    {/* Resend Link */}
+                    <View style={styles.resendContainer}>
+                        {resendCooldown > 0 ? (
+                            <Text style={styles.cooldownText}>
+                                Resend code in {resendCooldown}s
+                            </Text>
+                        ) : (
+                            <View style={styles.resendRow}>
+                                <Text style={styles.resendText}>
+                                    Didn't receive the code?{' '}
+                                </Text>
+                                <TouchableOpacity onPress={handleResend} disabled={loading}>
+                                    <Text style={styles.resendLink}>Resend</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </SafeAreaView>
+        </GradientBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
         flex: 1,
-        backgroundColor: colors.background,
     },
     content: {
         flex: 1,
         paddingHorizontal: spacing.xl,
     },
-    header: {
-        marginTop: spacing.xxl,
-        marginBottom: spacing.xl,
+    logoContainer: {
         alignItems: 'center',
+        marginTop: spacing.xl,
+        marginBottom: spacing.lg,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: spacing.xl,
     },
     title: {
-        ...typography.h1,
+        ...typography.display,
         color: colors.text,
         marginBottom: spacing.md,
+        textAlign: 'center',
     },
     subtitle: {
         ...typography.body,
         color: colors.textSecondary,
+        textAlign: 'center',
     },
     email: {
         ...typography.body,
@@ -140,7 +173,7 @@ const styles = StyleSheet.create({
     errorBanner: {
         backgroundColor: colors.error + '20',
         padding: spacing.md,
-        borderRadius: 8,
+        borderRadius: borderRadius.sm,
         marginBottom: spacing.lg,
         alignItems: 'center',
     },
@@ -149,22 +182,29 @@ const styles = StyleSheet.create({
         color: colors.error,
     },
     otpContainer: {
-        marginVertical: spacing.xl,
+        marginBottom: spacing.xl,
+    },
+    actions: {
+        marginBottom: spacing.lg,
     },
     resendContainer: {
         alignItems: 'center',
-        marginTop: spacing.lg,
+    },
+    resendRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     resendText: {
         ...typography.body,
+        color: colors.textSecondary,
+    },
+    resendLink: {
+        ...typography.body,
         color: colors.primary,
+        fontWeight: '600',
     },
     cooldownText: {
         ...typography.body,
         color: colors.textMuted,
-    },
-    actions: {
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.xxl,
     },
 });

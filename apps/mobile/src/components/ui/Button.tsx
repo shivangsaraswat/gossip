@@ -5,19 +5,24 @@ import {
     StyleSheet,
     ActivityIndicator,
     ViewStyle,
-    TextStyle,
+    View,
 } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 
 interface ButtonProps {
     title: string;
     onPress: () => void;
-    variant?: 'primary' | 'secondary' | 'outline';
+    variant?: 'primary' | 'secondary' | 'outline' | 'google';
     disabled?: boolean;
     loading?: boolean;
     style?: ViewStyle;
+    icon?: React.ReactNode;
 }
 
+/**
+ * Button Component
+ * Matches the Figma design with primary blue and white variants
+ */
 export function Button({
     title,
     onPress,
@@ -25,8 +30,46 @@ export function Button({
     disabled = false,
     loading = false,
     style,
+    icon,
 }: ButtonProps) {
     const isDisabled = disabled || loading;
+
+    const getBackgroundColor = () => {
+        switch (variant) {
+            case 'primary':
+                return colors.primary;
+            case 'secondary':
+                return colors.surfaceLight;
+            case 'outline':
+            case 'google':
+                return colors.white;
+            default:
+                return colors.primary;
+        }
+    };
+
+    const getTextColor = () => {
+        switch (variant) {
+            case 'primary':
+                return colors.white;
+            case 'secondary':
+            case 'outline':
+            case 'google':
+                return colors.text;
+            default:
+                return colors.white;
+        }
+    };
+
+    const getBorderStyle = () => {
+        if (variant === 'outline' || variant === 'google') {
+            return {
+                borderWidth: 1,
+                borderColor: colors.border,
+            };
+        }
+        return {};
+    };
 
     return (
         <TouchableOpacity
@@ -34,7 +77,8 @@ export function Button({
             disabled={isDisabled}
             style={[
                 styles.base,
-                styles[variant],
+                { backgroundColor: getBackgroundColor() },
+                getBorderStyle(),
                 isDisabled && styles.disabled,
                 style,
             ]}
@@ -42,13 +86,16 @@ export function Button({
         >
             {loading ? (
                 <ActivityIndicator
-                    color={variant === 'outline' ? colors.primary : colors.text}
+                    color={variant === 'primary' ? colors.white : colors.primary}
                     size="small"
                 />
             ) : (
-                <Text style={[styles.text, styles[`${variant}Text`] as TextStyle]}>
-                    {title}
-                </Text>
+                <View style={styles.content}>
+                    {icon && <View style={styles.icon}>{icon}</View>}
+                    <Text style={[styles.text, { color: getTextColor() }]}>
+                        {title}
+                    </Text>
+                </View>
             )}
         </TouchableOpacity>
     );
@@ -58,37 +105,23 @@ const styles = StyleSheet.create({
     base: {
         paddingVertical: spacing.md,
         paddingHorizontal: spacing.lg,
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.md,
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 52,
     },
-    primary: {
-        backgroundColor: colors.primary,
-    },
-    secondary: {
-        backgroundColor: colors.surfaceLight,
-    },
-    outline: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
     disabled: {
         opacity: 0.5,
     },
+    content: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    icon: {
+        marginRight: spacing.sm,
+    },
     text: {
-        ...typography.body,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    primaryText: {
-        color: colors.text,
-    },
-    secondaryText: {
-        color: colors.text,
-    },
-    outlineText: {
-        color: colors.text,
+        ...typography.button,
     },
 });

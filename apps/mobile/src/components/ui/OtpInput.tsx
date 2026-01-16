@@ -9,6 +9,11 @@ interface OtpInputProps {
     error?: boolean;
 }
 
+/**
+ * OTP Input Component
+ * 6 equal-width boxes with rounded corners
+ * Light theme matching Figma design
+ */
 export function OtpInput({ length = 6, value, onChange, error }: OtpInputProps) {
     const inputRefs = useRef<(TextInput | null)[]>([]);
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -75,21 +80,23 @@ const styles = StyleSheet.create({
     input: {
         width: 48,
         height: 56,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.md,
+        borderRadius: borderRadius.sm,
         textAlign: 'center',
         ...typography.h2,
         color: colors.text,
     },
     focused: {
         borderColor: colors.primary,
+        borderWidth: 2,
     },
     error: {
         borderColor: colors.error,
     },
     filled: {
-        borderColor: colors.borderLight,
+        borderColor: colors.primary,
+        backgroundColor: colors.primarySoft,
     },
 });

@@ -6,24 +6,39 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Button, Input } from '../../src/components/ui';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Button, Input, GossipLogo, PhoneInput, GradientBackground } from '../../src/components/ui';
 import { useAuth } from '../../src/hooks';
-import { colors, spacing, typography } from '../../src/theme';
+import { colors, spacing, typography, borderRadius } from '../../src/theme';
 
 /**
  * Register Screen
- * Creates new account with real-time username validation
+ * Screen 4 - Complete registration with all details
+ * 
+ * Features:
+ * - Gradient background
+ * - Back arrow at top left
+ * - Logo at top right
+ * - "Register" title with subtitle
+ * - Input fields: Username, Name, Email, Bio, Phone, Password
+ * - Phone input with country selector
+ * - "Register" primary button
+ * - Footer: Already have an account? Log in
  */
 export default function RegisterScreen() {
     const router = useRouter();
+    const params = useLocalSearchParams<{ username?: string }>();
     const { loading, error, checkUsername, register, clearError } = useAuth();
 
+    const [username, setUsername] = useState(params.username || '');
     const [displayName, setDisplayName] = useState('');
     const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
+    const [bio, setBio] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [countryCode, setCountryCode] = useState('IN');
     const [password, setPassword] = useState('');
 
     const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
@@ -63,8 +78,14 @@ export default function RegisterScreen() {
     const validate = useCallback(() => {
         const errors: Record<string, string> = {};
 
+        if (username.length < 3) {
+            errors.username = 'Username must be at least 3 characters';
+        } else if (usernameAvailable === false) {
+            errors.username = 'Username is already taken';
+        }
+
         if (!displayName.trim()) {
-            errors.displayName = 'Display name is required';
+            errors.displayName = 'Name is required';
         }
 
         if (!email.trim()) {
@@ -73,26 +94,20 @@ export default function RegisterScreen() {
             errors.email = 'Invalid email address';
         }
 
-        if (username.length < 3) {
-            errors.username = 'Username must be at least 3 characters';
-        } else if (usernameAvailable === false) {
-            errors.username = 'Username is already taken';
-        }
-
         if (password.length < 8) {
             errors.password = 'Password must be at least 8 characters';
         }
 
         setLocalErrors(errors);
         return Object.keys(errors).length === 0;
-    }, [displayName, email, username, password, usernameAvailable]);
+    }, [username, displayName, email, password, usernameAvailable]);
 
     const isValid =
+        username.length >= 3 &&
         displayName.trim() &&
         email.trim() &&
-        username.length >= 3 &&
-        usernameAvailable === true &&
-        password.length >= 8;
+        password.length >= 8 &&
+        usernameAvailable !== false;
 
     const handleSubmit = async () => {
         clearError();
@@ -113,112 +128,162 @@ export default function RegisterScreen() {
         }
     };
 
-    const getUsernameHint = () => {
-        if (usernameChecking) return 'Checking availability...';
-        if (usernameAvailable === true) return '✓ Username available';
-        if (usernameAvailable === false) return 'Username is taken';
-        return 'Lowercase letters, numbers, underscores';
+    const handleBack = () => {
+        router.back();
+    };
+
+    const handleCountryChange = (country: { code: string }) => {
+        setCountryCode(country.code);
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
-            >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
+        <GradientBackground>
+            <SafeAreaView style={styles.safeArea}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.keyboardView}
                 >
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Create Account</Text>
-                        <Text style={styles.subtitle}>
-                            Join Gossip and connect with others
-                        </Text>
+                    {/* Header with back button and logo */}
+                    <View style={styles.topBar}>
+                        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                            <Text style={styles.backArrow}>←</Text>
+                        </TouchableOpacity>
+                        <GossipLogo size={50} />
                     </View>
 
-                    {error && (
-                        <View style={styles.errorBanner}>
-                            <Text style={styles.errorText}>{error}</Text>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <Text style={styles.title}>Register</Text>
+                            <Text style={styles.subtitle}>
+                                Create an account to continue!
+                            </Text>
                         </View>
-                    )}
 
-                    <View style={styles.form}>
-                        <Input
-                            label="Display Name"
-                            placeholder="Your name"
-                            value={displayName}
-                            onChangeText={setDisplayName}
-                            error={localErrors.displayName}
-                            autoCapitalize="words"
-                        />
+                        {/* Error Banner */}
+                        {error && (
+                            <View style={styles.errorBanner}>
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
+                        )}
 
-                        <Input
-                            label="Email"
-                            placeholder="you@example.com"
-                            value={email}
-                            onChangeText={setEmail}
-                            error={localErrors.email}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                        />
+                        {/* Form */}
+                        <View style={styles.form}>
+                            <Input
+                                placeholder="Username"
+                                value={username}
+                                onChangeText={(text) => setUsername(text.toLowerCase())}
+                                error={localErrors.username}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                            />
 
-                        <Input
-                            label="Username"
-                            placeholder="your_username"
-                            value={username}
-                            onChangeText={(text) => setUsername(text.toLowerCase())}
-                            error={localErrors.username}
-                            hint={getUsernameHint()}
-                            success={usernameAvailable === true}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                        />
+                            <Input
+                                placeholder="Name"
+                                value={displayName}
+                                onChangeText={setDisplayName}
+                                error={localErrors.displayName}
+                                autoCapitalize="words"
+                            />
 
-                        <Input
-                            label="Password"
-                            placeholder="Minimum 8 characters"
-                            value={password}
-                            onChangeText={setPassword}
-                            error={localErrors.password}
-                            secureTextEntry
-                            autoCapitalize="none"
-                        />
-                    </View>
+                            <Input
+                                placeholder="Email@gmail.com"
+                                value={email}
+                                onChangeText={setEmail}
+                                error={localErrors.email}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                            />
 
-                    <View style={styles.actions}>
-                        <Button
-                            title="Create Account"
-                            onPress={handleSubmit}
-                            disabled={!isValid}
-                            loading={loading}
-                        />
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                            <Input
+                                placeholder="Bio"
+                                value={bio}
+                                onChangeText={setBio}
+                                multiline
+                                numberOfLines={2}
+                            />
+
+                            <PhoneInput
+                                value={phoneNumber}
+                                onChangeText={setPhoneNumber}
+                                countryCode={countryCode}
+                                onCountryChange={handleCountryChange}
+                            />
+
+                            <Input
+                                placeholder="••••••"
+                                value={password}
+                                onChangeText={setPassword}
+                                error={localErrors.password}
+                                secureTextEntry
+                                showPasswordToggle
+                                autoCapitalize="none"
+                            />
+                        </View>
+
+                        {/* Button */}
+                        <View style={styles.actions}>
+                            <Button
+                                title="Register"
+                                onPress={handleSubmit}
+                                disabled={!isValid}
+                                loading={loading}
+                            />
+                        </View>
+
+                        {/* Footer */}
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>
+                                Already have an account?{' '}
+                            </Text>
+                            <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+                                <Text style={styles.footerLink}>Log in</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </GradientBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
         flex: 1,
-        backgroundColor: colors.background,
     },
     keyboardView: {
         flex: 1,
+    },
+    topBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: spacing.xl,
+        paddingVertical: spacing.md,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+    },
+    backArrow: {
+        fontSize: 24,
+        color: colors.text,
     },
     scrollContent: {
         flexGrow: 1,
         paddingHorizontal: spacing.xl,
     },
     header: {
-        marginTop: spacing.xl,
         marginBottom: spacing.lg,
     },
     title: {
-        ...typography.h1,
+        ...typography.display,
         color: colors.text,
         marginBottom: spacing.xs,
     },
@@ -229,7 +294,7 @@ const styles = StyleSheet.create({
     errorBanner: {
         backgroundColor: colors.error + '20',
         padding: spacing.md,
-        borderRadius: 8,
+        borderRadius: borderRadius.sm,
         marginBottom: spacing.md,
     },
     errorText: {
@@ -240,7 +305,21 @@ const styles = StyleSheet.create({
         marginBottom: spacing.lg,
     },
     actions: {
-        marginTop: 'auto',
+        marginBottom: spacing.lg,
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
         paddingBottom: spacing.xl,
+    },
+    footerText: {
+        ...typography.body,
+        color: colors.textSecondary,
+    },
+    footerLink: {
+        ...typography.body,
+        color: colors.primary,
+        fontWeight: '600',
     },
 });

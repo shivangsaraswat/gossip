@@ -1,23 +1,24 @@
 /**
  * Gossip Design System
- * Clean, minimal, intentional
+ * Clean, minimal, premium - Light theme
+ * Based on locked Figma design specifications
  */
 
 export const colors = {
     // Primary
-    primary: '#6366F1',
-    primaryDark: '#4F46E5',
-    primaryLight: '#818CF8',
+    primary: '#49AAFF',
+    primarySoft: '#D2E8FC',
+    primaryDark: '#2D608B',
 
     // Backgrounds
-    background: '#000000',
-    surface: '#111111',
-    surfaceLight: '#1A1A1A',
+    background: '#F9FBFD',
+    surface: '#FFFFFF',
+    surfaceLight: '#F5F8FA',
 
     // Text
-    text: '#FFFFFF',
-    textSecondary: '#A1A1AA',
-    textMuted: '#52525B',
+    text: '#101010',
+    textSecondary: '#6B7280',
+    textMuted: '#9CA3AF',
 
     // Semantic
     success: '#22C55E',
@@ -25,8 +26,12 @@ export const colors = {
     warning: '#F59E0B',
 
     // Borders
-    border: '#27272A',
-    borderLight: '#3F3F46',
+    border: '#D4D4D8',
+    borderLight: '#E5E7EB',
+
+    // Other
+    white: '#FFFFFF',
+    overlay: 'rgba(0, 0, 0, 0.5)',
 };
 
 export const spacing = {
@@ -39,42 +44,92 @@ export const spacing = {
 };
 
 export const borderRadius = {
-    sm: 4,
-    md: 8,
-    lg: 12,
-    xl: 16,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
     full: 9999,
 };
 
 export const typography = {
-    h1: {
-        fontSize: 32,
+    // Display - Screen titles (bold, large)
+    display: {
+        fontSize: 28,
         fontWeight: '700' as const,
-        lineHeight: 40,
+        lineHeight: 34,
+        fontFamily: 'System', // Will use Helvetica Neue on iOS
     },
-    h2: {
-        fontSize: 24,
-        fontWeight: '600' as const,
-        lineHeight: 32,
-    },
-    h3: {
-        fontSize: 20,
+    // Title - Section headers
+    title: {
+        fontSize: 22,
         fontWeight: '600' as const,
         lineHeight: 28,
+        fontFamily: 'System',
     },
-    body: {
-        fontSize: 16,
-        fontWeight: '400' as const,
+    // H1 - Legacy support
+    h1: {
+        fontSize: 28,
+        fontWeight: '700' as const,
+        lineHeight: 34,
+        fontFamily: 'System',
+    },
+    // H2 - Secondary headers
+    h2: {
+        fontSize: 22,
+        fontWeight: '600' as const,
+        lineHeight: 28,
+        fontFamily: 'System',
+    },
+    // H3 - Tertiary headers
+    h3: {
+        fontSize: 18,
+        fontWeight: '500' as const,
         lineHeight: 24,
+        fontFamily: 'System',
     },
-    bodySmall: {
-        fontSize: 14,
+    // Body - Regular text
+    body: {
+        fontSize: 15,
         fontWeight: '400' as const,
-        lineHeight: 20,
+        lineHeight: 22,
+        fontFamily: 'System',
     },
+    // Body small - Secondary body text
+    bodySmall: {
+        fontSize: 13,
+        fontWeight: '400' as const,
+        lineHeight: 18,
+        fontFamily: 'System',
+    },
+    // Caption - Meta information
     caption: {
         fontSize: 12,
         fontWeight: '400' as const,
         lineHeight: 16,
+        fontFamily: 'System',
+    },
+    // Button text
+    button: {
+        fontSize: 16,
+        fontWeight: '600' as const,
+        lineHeight: 24,
+        fontFamily: 'System',
+    },
+};
+
+export const shadows = {
+    sm: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    md: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
 };
