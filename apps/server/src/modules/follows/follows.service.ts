@@ -130,14 +130,23 @@ export const followsService = {
         }
 
         // Delete request and create follow in transaction
+        // Delete request and create MUTUAL follow in transaction
         await prisma.$transaction([
             prisma.followRequest.delete({
                 where: { id: requestId },
             }),
+            // Create A -> B
             prisma.follow.create({
                 data: {
                     followerId: request.senderId,
                     followingId: request.receiverId,
+                },
+            }),
+            // Create B -> A (Mutual)
+            prisma.follow.create({
+                data: {
+                    followerId: request.receiverId,
+                    followingId: request.senderId,
                 },
             }),
         ]);
@@ -274,5 +283,44 @@ export const followsService = {
             sender: req.sender,
             createdAt: req.createdAt,
         }));
+    },
+
+    /**
+     * Get all connected (mutual) users
+     * Returns users where both A follows B AND B follows A
+     */
+    async getConnectedUsers(userId: string) {
+        // Find all users that current user follows
+        const following = await prisma.follow.findMany({
+            where: { followerId: userId },
+            select: { followingId: true },
+        });
+
+        const followingIds = following.map((f) => f.followingId);
+
+        if (followingIds.length === 0) {
+            return [];
+        }
+
+        // Find mutual: users who also follow the current user back
+        // The "follower" in this query is the person who follows US (i.e., one of the followingIds)
+        const mutualFollows = await prisma.follow.findMany({
+            where: {
+                followerId: { in: followingIds },
+                followingId: userId,
+            },
+            include: {
+                follower: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                    },
+                },
+            },
+        });
+
+        // Return user info of mutual connections
+        return mutualFollows.map((f) => f.follower);
     },
 };

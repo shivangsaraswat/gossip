@@ -102,9 +102,29 @@ export const followsController = {
         try {
             const currentUserId = (req as unknown as Request & { userId: string }).userId;
             const result = await followsService.getStatus(currentUserId, req.params.userId);
+
+            // Map internal status to strict Connection Profile System states
+            let relationshipStatus = 'none';
+            switch (result.relationship) {
+                case 'mutual':
+                    relationshipStatus = 'connected';
+                    break;
+                case 'request_sent':
+                    relationshipStatus = 'requested';
+                    break;
+                case 'request_received':
+                    relationshipStatus = 'incoming';
+                    break;
+                case 'following':
+                    relationshipStatus = 'none'; // Treat one-way follow as none in this system
+                    break;
+                default:
+                    relationshipStatus = 'none';
+            }
+
             res.status(200).json({
                 success: true,
-                data: result,
+                data: { relationshipStatus },
             });
         } catch (error) {
             next(error);
@@ -127,6 +147,24 @@ export const followsController = {
             next(error);
         }
     },
+
+    async getConnected(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        try {
+            const userId = (req as Request & { userId: string }).userId;
+            const connections = await followsService.getConnectedUsers(userId);
+            res.status(200).json({
+                success: true,
+                data: { connections },
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
 };
 
 export { FollowError };
+

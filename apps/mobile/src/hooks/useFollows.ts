@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { api } from '../lib/api';
-import type { RelationshipStatus } from '../components/ui/UserCard';
+
+export type ConnectionStatus = 'none' | 'requested' | 'incoming' | 'connected';
 
 interface PendingRequest {
     id: string;
@@ -104,11 +105,11 @@ export function useFollows() {
         }
     }, []);
 
-    const getRelationshipStatus = useCallback(async (userId: string): Promise<RelationshipStatus | null> => {
+    const getRelationshipStatus = useCallback(async (userId: string): Promise<ConnectionStatus | null> => {
         try {
             const response = await api.get(`/api/follows/status/${userId}`);
             if (response.data.success) {
-                return response.data.data.relationship;
+                return response.data.data.relationshipStatus;
             }
             return null;
         } catch {
