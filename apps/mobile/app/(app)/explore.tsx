@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -6,212 +6,205 @@ import {
     FlatList,
     TextInput,
     TouchableOpacity,
-    RefreshControl,
+    Image,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { UserCard, type RelationshipStatus } from '../../src/components/ui';
-import { useUsers, useFollows, type SearchUser } from '../../src/hooks';
-import { useAuthStore } from '../../src/store';
+import { UserCard, Icon, GradientBackground } from '../../src/components/ui';
+import { useUsers, useRecentSearches, type SearchUser } from '../../src/hooks';
 import { colors, spacing, borderRadius, typography } from '../../src/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 /**
- * Explore Members Screen
- * Core of Phase 1C - find and connect with others
+ * New Connect Screen
+ * Pixel-perfect replication of "New Connect" design
  */
-export default function ExploreScreen() {
+export default function NewConnectScreen() {
     const router = useRouter();
-    const logout = useAuthStore((state) => state.logout);
-    const user = useAuthStore((state) => state.user);
 
+    // Data Hooks
     const { loading: searchLoading, users, searchUsers, clearUsers } = useUsers();
     const {
-        actionLoading,
-        pendingRequests,
-        sendFollowRequest,
-        acceptFollowRequest,
-        cancelFollowRequest,
-        fetchPendingRequests,
-    } = useFollows();
+        recentSearches,
+        addRecentSearch,
+        removeRecentSearch
+    } = useRecentSearches();
 
+    // Local State
     const [query, setQuery] = useState('');
-    const [refreshing, setRefreshing] = useState(false);
-    const [localUsers, setLocalUsers] = useState<SearchUser[]>([]);
 
-    // Sync users with local state for optimistic updates
-    useEffect(() => {
-        setLocalUsers(users);
-    }, [users]);
-
-    // Fetch pending requests on mount
-    useEffect(() => {
-        fetchPendingRequests();
-    }, [fetchPendingRequests]);
-
-    // Debounced search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (query.trim()) {
-                searchUsers(query.trim());
-            } else {
-                clearUsers();
-            }
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [query, searchUsers, clearUsers]);
-
-    const handleRefresh = useCallback(async () => {
-        setRefreshing(true);
-        await Promise.all([
-            query.trim() ? searchUsers(query.trim()) : Promise.resolve(),
-            fetchPendingRequests(),
-        ]);
-        setRefreshing(false);
-    }, [query, searchUsers, fetchPendingRequests]);
-
-    const handleFollowAction = useCallback(async (
-        userId: string,
-        action: 'follow' | 'accept' | 'unfollow' | 'cancel'
-    ) => {
-        // Optimistic update
-        setLocalUsers((prev) =>
-            prev.map((u) => {
-                if (u.id !== userId) return u;
-                let newRelationship: RelationshipStatus = u.relationship;
-                if (action === 'follow') newRelationship = 'request_sent';
-                if (action === 'accept') newRelationship = 'mutual';
-                if (action === 'unfollow') newRelationship = 'not_following';
-                if (action === 'cancel') newRelationship = 'not_following';
-                return { ...u, relationship: newRelationship };
-            })
-        );
-
-        let success = false;
-        if (action === 'follow') {
-            success = await sendFollowRequest(userId);
-        } else if (action === 'accept') {
-            // Find request ID for this user
-            const request = pendingRequests.find((r) => r.sender.id === userId);
-            if (request) {
-                success = await acceptFollowRequest(request.id);
-            }
-        } else if (action === 'cancel') {
-            success = await cancelFollowRequest(userId);
+    // Search Logic
+    const handleSearch = useCallback((text: string) => {
+        setQuery(text);
+        if (text.trim().length > 1) {
+            searchUsers(text.trim());
+        } else {
+            clearUsers();
         }
+    }, [searchUsers, clearUsers]);
 
-        // Revert on failure
-        if (!success) {
-            setLocalUsers(users);
-        }
-    }, [sendFollowRequest, acceptFollowRequest, cancelFollowRequest, pendingRequests, users]);
-
+    // Navigation & Actions
     const handleUserPress = useCallback((userId: string) => {
+        addRecentSearch(userId);
+        router.push(`/(app)/profile/${userId}`);
+    }, [router, addRecentSearch]);
+
+    const handleRecentSearchPress = useCallback((userId: string) => {
         router.push(`/(app)/profile/${userId}`);
     }, [router]);
 
-    const renderUser = useCallback(({ item }: { item: SearchUser }) => {
-        // Check if there's a pending request from this user
-        const hasIncomingRequest = pendingRequests.some(
-            (r) => r.sender.id === item.id
-        );
-        const relationship: RelationshipStatus = hasIncomingRequest
-            ? 'request_received'
-            : item.relationship;
+    const handleNewGroup = () => {
+        // TODO: Implement group creation
+        console.log('New group pressed');
+    };
 
-        return (
-            <UserCard
-                {...item}
-                relationship={relationship}
-                onPress={() => handleUserPress(item.id)}
-                onFollowAction={(action) => handleFollowAction(item.id, action)}
-                loading={actionLoading === item.id}
-            />
-        );
-    }, [pendingRequests, actionLoading, handleUserPress, handleFollowAction]);
+    const handleNewCommunity = () => {
+        // TODO: Implement community creation
+        console.log('New community pressed');
+    };
 
-    const renderEmpty = useCallback(() => {
-        if (searchLoading) {
-            return (
-                <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Searching...</Text>
-                </View>
-            );
-        }
-
-        if (query.trim()) {
-            return (
-                <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyTitle}>No users found</Text>
-                    <Text style={styles.emptyText}>
-                        Try a different username
+    // Render Components
+    const renderRecentSearchItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            style={styles.recentItem}
+            onPress={() => handleRecentSearchPress(item.searchedUser.id)}
+            activeOpacity={0.7}
+        >
+            <View style={styles.recentAvatarContainer}>
+                {/* Placeholder avatar logic - simplified for now */}
+                <LinearGradient
+                    colors={['#E5E7EB', '#D1D5DB']}
+                    style={styles.avatarPlaceholder}
+                >
+                    <Text style={styles.avatarInitial}>
+                        {item.searchedUser.displayName?.[0]?.toUpperCase() || '?'}
                     </Text>
-                </View>
-            );
-        }
-
-        return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyTitle}>Find People</Text>
-                <Text style={styles.emptyText}>
-                    Search by username to connect with others
+                </LinearGradient>
+            </View>
+            <View style={styles.recentInfo}>
+                <Text style={styles.recentName}>
+                    {item.searchedUser.displayName}
+                </Text>
+                <Text style={styles.recentBio} numberOfLines={1}>
+                    @{item.searchedUser.username}
                 </Text>
             </View>
-        );
-    }, [searchLoading, query]);
+            <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => removeRecentSearch(item.searchedUser.id)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Icon name="close" size={14} color={colors.textMuted} />
+            </TouchableOpacity>
+        </TouchableOpacity>
+    );
+
+    const renderSearchResult = ({ item }: { item: SearchUser }) => (
+        <UserCard
+            {...item}
+            relationship={item.relationship}
+            onPress={() => handleUserPress(item.id)}
+            // Hiding action buttons in search results as per design reference
+            // They can manage relationship on profile page
+            onFollowAction={() => { }}
+        />
+    );
+
+    // Dynamic Content
+    const isSearching = query.trim().length > 1;
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            {/* 2. Header */}
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.greeting}>
-                        Hello, {user && 'displayName' in user ? user.displayName : 'there'}
-                    </Text>
-                    <Text style={styles.title}>Explore</Text>
-                </View>
-                <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-                    <Text style={styles.logoutText}>Logout</Text>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                    <Icon name="chevron-back" size={22} color={colors.text} />
                 </TouchableOpacity>
+                <Text style={styles.headerTitle}>New connect</Text>
+                <View style={styles.headerRight} />
             </View>
 
-            {/* Search */}
+            {/* 3. Search Bar */}
             <View style={styles.searchContainer}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search by username..."
-                    placeholderTextColor={colors.textMuted}
-                    value={query}
-                    onChangeText={setQuery}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                />
+                <View style={styles.searchBar}>
+                    <Icon name="search" size={18} color={colors.textMuted} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search"
+                        placeholderTextColor={colors.textMuted}
+                        value={query}
+                        onChangeText={handleSearch}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+                </View>
             </View>
 
-            {/* Pending Requests Banner */}
-            {pendingRequests.length > 0 && !query.trim() && (
-                <View style={styles.pendingBanner}>
-                    <Text style={styles.pendingText}>
-                        {pendingRequests.length} pending request{pendingRequests.length > 1 ? 's' : ''}
-                    </Text>
-                </View>
-            )}
+            {/* Content Switcher */}
+            {isSearching ? (
+                // Search Results
+                <FlatList
+                    data={users}
+                    renderItem={renderSearchResult}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContent}
+                    keyboardShouldPersistTaps="handled"
+                    ListEmptyComponent={
+                        !searchLoading ? (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>No users found</Text>
+                            </View>
+                        ) : null
+                    }
+                />
+            ) : (
+                // Default View: Quick Actions + Recent Searches
+                <FlatList
+                    data={recentSearches}
+                    renderItem={renderRecentSearchItem}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContent}
+                    keyboardShouldPersistTaps="handled"
+                    ListHeaderComponent={
+                        <View>
+                            {/* 4. Quick Action Items */}
+                            <TouchableOpacity style={styles.actionItem} onPress={handleNewGroup}>
+                                <LinearGradient
+                                    colors={['#49AAFF', '#188BEF']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 0, y: 1 }}
+                                    style={styles.actionIcon}
+                                >
+                                    <Icon name="people" size={20} color={colors.white} />
+                                </LinearGradient>
+                                <Text style={styles.actionLabel}>New Group</Text>
+                            </TouchableOpacity>
 
-            {/* Users List */}
-            <FlatList
-                data={localUsers}
-                renderItem={renderUser}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContent}
-                ListEmptyComponent={renderEmpty}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={handleRefresh}
-                        tintColor={colors.primary}
-                    />
-                }
-            />
+                            <TouchableOpacity style={[styles.actionItem, styles.actionItemSpacing]} onPress={handleNewCommunity}>
+                                <LinearGradient
+                                    colors={['#49AAFF', '#188BEF']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 0, y: 1 }}
+                                    style={styles.actionIcon}
+                                >
+                                    <Icon name="globe" size={20} color={colors.white} />
+                                </LinearGradient>
+                                <Text style={styles.actionLabel}>New Community</Text>
+                            </TouchableOpacity>
+
+                            {/* 5. Section Title */}
+                            {recentSearches.length > 0 && (
+                                <Text style={styles.sectionTitle}>Recent Searches</Text>
+                            )}
+                        </View>
+                    }
+                />
+            )}
         </SafeAreaView>
     );
 }
@@ -219,74 +212,136 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.white,
     },
+    // Header
     header: {
+        height: 56,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        backgroundColor: colors.white,
     },
-    greeting: {
-        ...typography.bodySmall,
-        color: colors.textSecondary,
+    backButton: {
+        paddingRight: 8,
     },
-    title: {
-        ...typography.h1,
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
         color: colors.text,
+        textAlign: 'center',
     },
-    logoutButton: {
-        padding: spacing.sm,
+    headerRight: {
+        width: 22, // Balance back button width approx
     },
-    logoutText: {
-        ...typography.bodySmall,
-        color: colors.textMuted,
-    },
+
+    // Search
     searchContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.md,
+        paddingHorizontal: 16,
+        marginTop: 12,
+        marginBottom: 16,
+    },
+    searchBar: {
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#F2F3F5',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
     },
     searchInput: {
-        backgroundColor: colors.surface,
-        borderRadius: borderRadius.lg,
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
-        ...typography.body,
-        color: colors.text,
-    },
-    pendingBanner: {
-        backgroundColor: colors.primary + '20',
-        marginHorizontal: spacing.lg,
-        marginBottom: spacing.md,
-        padding: spacing.md,
-        borderRadius: borderRadius.md,
-    },
-    pendingText: {
-        ...typography.bodySmall,
-        color: colors.primary,
-        textAlign: 'center',
-    },
-    listContent: {
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.xxl,
-        flexGrow: 1,
-    },
-    emptyContainer: {
         flex: 1,
+        marginLeft: 8,
+        fontSize: 15,
+        color: colors.text,
+        height: '100%',
+    },
+
+    // Quick Actions
+    actionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        height: 48,
+    },
+    actionItemSpacing: {
+        marginTop: 8,
+    },
+    actionIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: spacing.xxl * 2,
+        marginRight: 12,
+        overflow: 'hidden', // Ensure gradient respects borderRadius
     },
-    emptyTitle: {
-        ...typography.h3,
+    actionLabel: {
+        fontSize: 16,
         color: colors.text,
-        marginBottom: spacing.sm,
+        fontWeight: '400',
+    },
+
+    // Recent Searches
+    sectionTitle: {
+        marginTop: 24,
+        marginBottom: 8,
+        paddingHorizontal: 16,
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.textMuted,
+    },
+    listContent: {
+        paddingBottom: 24,
+    },
+    recentItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 60,
+        paddingHorizontal: 16,
+    },
+    recentAvatarContainer: {
+        marginRight: 12,
+    },
+    avatarPlaceholder: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarInitial: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.textSecondary,
+    },
+    recentInfo: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    recentName: {
+        fontSize: 15,
+        fontWeight: '500',
+        color: colors.text,
+        marginBottom: 2,
+    },
+    recentBio: {
+        fontSize: 13,
+        color: colors.textMuted,
+    },
+    closeButton: {
+        padding: 4,
+    },
+
+    // Empty States
+    emptyContainer: {
+        padding: 24,
+        alignItems: 'center',
     },
     emptyText: {
-        ...typography.body,
-        color: colors.textSecondary,
-        textAlign: 'center',
+        fontSize: 15,
+        color: colors.textMuted,
     },
 });
+

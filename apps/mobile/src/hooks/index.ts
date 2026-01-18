@@ -1,3 +1,4 @@
-export { useAuth } from './useAuth';
-export { useUsers, type SearchUser } from './useUsers';
-export { useFollows } from './useFollows';
+export * from './useAuth';
+export * from './useUsers';
+export * from './useFollows';
+export * from './useRecentSearches';

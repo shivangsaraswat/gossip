@@ -36,6 +36,10 @@ model User {
   following              Follow[]        @relation("Following")
   followers              Follow[]        @relation("Followers")
 
+  // Recent search relationships
+  recentSearches RecentSearch[] @relation("RecentSearches")
+  searchedBy     RecentSearch[] @relation("SearchedBy")
+
   @@index([email])
   @@index([username])
   @@map("users")
@@ -101,4 +105,19 @@ model Follow {
   @@index([followerId])
   @@index([followingId])
   @@map("follows")
+}
+
+model RecentSearch {
+  id             String   @id @default(cuid())
+  userId         String
+  searchedUserId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User @relation("RecentSearches", fields: [userId], references: [id], onDelete: Cascade)
+  searchedUser User @relation("SearchedBy", fields: [searchedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, searchedUserId])
+  @@index([userId])
+  @@map("recent_searches")
 }
