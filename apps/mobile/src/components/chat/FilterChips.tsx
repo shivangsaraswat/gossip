@@ -26,7 +26,7 @@ interface ChipProps {
 
 function Chip({ label, count, isActive, onPress, showCheckmark }: ChipProps) {
     // Active Color Logic: #114A7B for All and generally for active state per user request for consistency
-    const activeColors = ['#114A7B', '#114A7B'];
+    const activeColors = ['#114A7B', '#114A7B'] as const;
 
     const content = (
         <View style={styles.chipContent}>

@@ -92,25 +92,25 @@ const styles = StyleSheet.create({
     },
     blueContainer: {
         flexDirection: 'row',
-        borderRadius: 12,           // External Radius: 12
+        borderRadius: 12,           // External Radius
         padding: 3,                 // Padding to create the inset effect
         alignItems: 'center',
-        height: 44,                 // Fixed height
-        minWidth: 90,               // Ensure enough width for both
+        height: 40,                 // Reduced height (was 44)
+        minWidth: 80,               // Reduced width check
     },
     addButton: {
-        width: 40,
-        height: 38,                 // Match height within padding
+        width: 36,                  // Reduced width
+        height: 34,                 // Reduced height
         justifyContent: 'center',
         alignItems: 'center',
-        flex: 1,                    // Take remaining space on left
-        marginRight: 2,             // Slight spacing to white button
+        flex: 1,
+        marginRight: 2,
     },
     notificationButton: {
-        width: 40,                  // specific width
-        height: 38,                 // Fill height within padding
+        width: 38,                  // Reduced width
+        height: 34,                 // Reduced height
         backgroundColor: colors.white,
-        borderRadius: 10,           // Internal Radius: 10
+        borderRadius: 9,            // Internal Radius slightly reduced
         justifyContent: 'center',
         alignItems: 'center',
     },
