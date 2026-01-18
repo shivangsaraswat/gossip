@@ -67,8 +67,7 @@ export default function ChatsScreen() {
     };
 
     const handleNotificationPress = () => {
-        // TODO: Open notifications
-        console.log('Open notifications');
+        router.push('/(app)/notifications');
     };
 
     const handleToggleStories = () => {
