@@ -17,6 +17,10 @@ enum OtpType {
   PASSWORD_RESET
 }
 
+enum NotificationType {
+  CONNECTION_REQUEST
+}
+
 model User {
   id           String        @id @default(cuid())
   email        String        @unique
@@ -39,6 +43,10 @@ model User {
   // Recent search relationships
   recentSearches RecentSearch[] @relation("RecentSearches")
   searchedBy     RecentSearch[] @relation("SearchedBy")
+
+  // Notification relationships
+  notificationsReceived Notification[] @relation("NotificationsReceived")
+  notificationsSent     Notification[] @relation("NotificationsSent")
 
   @@index([email])
   @@index([username])
@@ -120,4 +128,20 @@ model RecentSearch {
   @@unique([userId, searchedUserId])
   @@index([userId])
   @@map("recent_searches")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String           // Receiver of notification
+  actorId     String           // Who triggered it
+  type        NotificationType
+  referenceId String?          // e.g., FollowRequest.id
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user  User @relation("NotificationsReceived", fields: [userId], references: [id], onDelete: Cascade)
+  actor User @relation("NotificationsSent", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
 }

@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { getRelationshipStatus, type RelationshipStatus } from '../../lib/permissions.js';
+import { notificationsService } from '../notifications/notifications.service.js';
 
 export class FollowError extends Error {
     constructor(
@@ -93,12 +94,20 @@ export const followsService = {
         }
 
         // Create follow request
-        await prisma.followRequest.create({
+        const followRequest = await prisma.followRequest.create({
             data: {
                 senderId,
                 receiverId,
             },
         });
+
+        // Create notification for receiver
+        await notificationsService.createNotification(
+            receiverId,
+            senderId,
+            'CONNECTION_REQUEST',
+            followRequest.id
+        );
 
         return { message: 'Follow request sent' };
     },
@@ -133,6 +142,9 @@ export const followsService = {
             }),
         ]);
 
+        // Delete notification
+        await notificationsService.deleteByReferenceId(requestId);
+
         return { message: 'Follow request accepted' };
     },
 
@@ -156,6 +168,9 @@ export const followsService = {
         await prisma.followRequest.delete({
             where: { id: requestId },
         });
+
+        // Delete notification
+        await notificationsService.deleteByReferenceId(requestId);
 
         return { message: 'Follow request rejected' };
     },
