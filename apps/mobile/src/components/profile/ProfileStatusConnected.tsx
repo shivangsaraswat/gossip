@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import { Icon } from '../ui';
 
@@ -18,10 +19,15 @@ export function ProfileStatusConnected({
         <View style={styles.container}>
             {/* Action Buttons */}
             <View style={styles.buttonRow}>
-                {/* Connected Button - Solid Disabled */}
-                <View style={[styles.button, styles.connectedButton]}>
+                {/* Connected Button - Gradient */}
+                <LinearGradient
+                    colors={['#49AAFF', '#188BEF']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={[styles.button, styles.connectedButton]}
+                >
                     <Text style={styles.connectedButtonText}>Connected</Text>
-                </View>
+                </LinearGradient>
 
                 {/* Message Button - Primary Outline */}
                 <TouchableOpacity
@@ -140,7 +146,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#EFF6FF', // Light blue bg
     },
     connectedButton: {
-        backgroundColor: '#3B82F6', // Blue
+        // backgroundColor removed for gradient
         opacity: 1, // Solid as per spec? "Solid blue, disabled"
     },
     connectedButtonText: {

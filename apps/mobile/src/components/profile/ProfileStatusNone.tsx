@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import { Icon } from '../ui';
 
@@ -17,16 +18,23 @@ export function ProfileStatusNone({
     return (
         <View style={styles.container}>
             <View style={styles.buttonRow}>
-                {/* Connect Button - Primary */}
+                {/* Connect Button - Primary Gradient */}
                 <TouchableOpacity
-                    style={[styles.button, styles.primaryButton]}
+                    style={styles.buttonWrapper}
                     onPress={onConnect}
                     disabled={loading}
                     activeOpacity={0.8}
                 >
-                    <Text style={styles.primaryButtonText}>
-                        {loading ? 'Connecting...' : 'Connect'}
-                    </Text>
+                    <LinearGradient
+                        colors={['#49AAFF', '#188BEF']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        style={styles.button}
+                    >
+                        <Text style={styles.primaryButtonText}>
+                            {loading ? 'Connecting...' : 'Connect'}
+                        </Text>
+                    </LinearGradient>
                 </TouchableOpacity>
 
                 {/* Message Button - Disabled Outline */}
@@ -54,16 +62,17 @@ const styles = StyleSheet.create({
         gap: spacing.md,
         width: '100%',
     },
-    button: {
+    buttonWrapper: {
         flex: 1,
+    },
+    button: {
         height: 44,
         borderRadius: borderRadius.md,
         justifyContent: 'center',
         alignItems: 'center',
+        width: '100%',
     },
-    primaryButton: {
-        backgroundColor: '#3B82F6', // Primary blue
-    },
+    // primaryButton style removed as it's handled by gradient
     outlineButton: {
         backgroundColor: 'transparent',
         borderWidth: 1,

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -72,11 +72,11 @@ export default function UserProfileScreen() {
     // 5. Render Logic
     if (profileLoading || loading || !user) {
         return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.centerContent}>
-                    <Text>Loading...</Text>
-                </View>
-            </SafeAreaView>
+            <View style={styles.container}>
+                <SafeAreaView style={styles.centerContent} edges={['top', 'bottom']}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                </SafeAreaView>
+            </View>
         );
     }
 
@@ -117,71 +117,81 @@ export default function UserProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <Icon name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <View style={styles.headerTitleContainer}>
-                    <Text style={styles.headerTitle}>{user.username}</Text>
-                    {/* Verified badge placeholder if needed */}
-                    <Icon name="checkmark-circle" size={16} color="#3B82F6" style={{ marginLeft: 4 }} />
-                </View>
-                <TouchableOpacity style={styles.menuButton}>
-                    <Icon name="ellipsis-vertical" size={20} color={colors.text} />
-                </TouchableOpacity>
-            </View>
-
-            {/* Profile Content */}
-            <View style={styles.content}>
-                {/* Avatar */}
-                <View style={styles.avatarContainer}>
-                    <LinearGradient
-                        colors={['#3B82F6', '#2563EB']} // Blue ring border gradient
-                        style={styles.avatarRing}
+        <View style={styles.container}>
+            <LinearGradient
+                colors={['#DAF0FF', '#FFFFFF', '#FFFFFF']}
+                locations={[0, 0.3, 1]}
+                style={StyleSheet.absoluteFill}
+            />
+            <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                        <View style={styles.avatarInner}>
-                            <Text style={styles.avatarInitial}>
-                                {user.displayName?.[0]?.toUpperCase()}
-                            </Text>
-                        </View>
-                    </LinearGradient>
+                        <Icon name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <View style={styles.headerTitleContainer}>
+                        <Text style={styles.headerTitle}>{user.username}</Text>
+                        {/* Verified badge placeholder if needed */}
+                        <Icon name="checkmark-circle" size={16} color="#3B82F6" style={{ marginLeft: 4 }} />
+                    </View>
+                    <TouchableOpacity style={styles.menuButton}>
+                        <Icon name="ellipsis-vertical" size={20} color={colors.text} />
+                    </TouchableOpacity>
                 </View>
 
-                {/* Name & Bio */}
-                <View style={styles.infoContainer}>
-                    <Text style={styles.displayName}>{user.displayName}</Text>
-                    <Text style={styles.bio}>
-                        {user.bio || 'when topic is you, you know i don’t lie'}
-                        {/* Placeholder bio from design if empty */}
-                    </Text>
-                    {/* Phone placeholder if connected? Spec says "Optional phone number" */}
-                    {status === 'connected' && (
-                        <View style={styles.phoneContainer}>
-                            <Icon name="phone-portrait-outline" size={14} color={colors.textSecondary} />
-                            <Text style={styles.phoneText}>+91 6328102514</Text>
-                        </View>
-                    )}
-                </View>
+                {/* Profile Content */}
+                <View style={styles.content}>
+                    {/* Avatar */}
+                    <View style={styles.avatarContainer}>
+                        <LinearGradient
+                            colors={['#3B82F6', '#2563EB']} // Blue ring border gradient
+                            style={styles.avatarRing}
+                        >
+                            <View style={styles.avatarInner}>
+                                <Text style={styles.avatarInitial}>
+                                    {user.displayName?.[0]?.toUpperCase()}
+                                </Text>
+                            </View>
+                        </LinearGradient>
+                    </View>
 
-                {/* Status Component */}
-                <View style={styles.actionContainer}>
-                    {renderActionSection()}
+                    {/* Name & Bio */}
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.displayName}>{user.displayName}</Text>
+                        <Text style={styles.bio}>
+                            {user.bio || 'when topic is you, you know i don’t lie'}
+                            {/* Placeholder bio from design if empty */}
+                        </Text>
+                        {/* Phone placeholder if connected? Spec says "Optional phone number" */}
+                        {status === 'connected' && (
+                            <View style={styles.phoneContainer}>
+                                <Icon name="phone-portrait-outline" size={14} color={colors.textSecondary} />
+                                <Text style={styles.phoneText}>+91 6328102514</Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Status Component */}
+                    <View style={styles.actionContainer}>
+                        {renderActionSection()}
+                    </View>
                 </View>
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F9FF', // Light gradient bg simulation
+        backgroundColor: colors.white, // Fallback
+    },
+    safeArea: {
+        flex: 1,
     },
     centerContent: {
         flex: 1,
@@ -238,7 +248,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 3,
-        borderColor: '#F0F9FF', // Match bg to create gap effect? Or white
+        borderColor: colors.white, // Match bg to create gap effect
     },
     avatarInitial: {
         fontSize: 32,
