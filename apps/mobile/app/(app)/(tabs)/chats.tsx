@@ -63,8 +63,7 @@ export default function ChatsScreen() {
     };
 
     const handleAddPress = () => {
-        // TODO: Open new chat/compose flow
-        console.log('Add new chat');
+        router.push('/(app)/explore');
     };
 
     const handleNotificationPress = () => {
