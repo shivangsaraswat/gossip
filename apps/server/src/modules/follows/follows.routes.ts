@@ -36,4 +36,8 @@ router.get('/requests', followsController.getPendingRequests);
 // Get relationship status with a user
 router.get('/status/:userId', followsController.getStatus);
 
+// Get connected (mutual) users
+router.get('/connected', followsController.getConnected);
+
 export default router;
+

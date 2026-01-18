@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -13,6 +13,7 @@ import {
     EmptyChatState,
 } from '../../../src/components/chat';
 import { colors, spacing } from '../../../src/theme';
+import { useConnections } from '../../../src/hooks';
 import type { Chat, Story, ChatListState } from '../../../src/types';
 
 /**
@@ -28,22 +29,36 @@ import type { Chat, Story, ChatListState } from '../../../src/types';
 export default function ChatsScreen() {
     const router = useRouter();
 
-    // UI State - would be derived from data in production
-    // Currently empty for initial implementation
-    const [chats] = useState<Chat[]>([]);
+    // Data from backend
+    const { connections, loading: connectionsLoading, refetch } = useConnections();
+
+    // UI State
     const [stories] = useState<Story[]>([]);
-    const [isLoading] = useState(false);
     const [storiesHidden, setStoriesHidden] = useState(false);
     const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'groups'>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Map connections to Chat format for display
+    const chats: Chat[] = useMemo(() => {
+        return connections.map((connection) => ({
+            id: connection.id,
+            participant: {
+                id: connection.id,
+                username: connection.username,
+                displayName: connection.displayName,
+            },
+            // No last message yet - will be populated when messaging is implemented
+            lastMessage: undefined,
+        }));
+    }, [connections]);
+
     // Derive UI state from data
     const uiState: ChatListState = useMemo(() => {
-        if (isLoading) return 'loading';
+        if (connectionsLoading) return 'loading';
         if (chats.length === 0) return 'emptyChats';
         if (stories.length > 0 && !storiesHidden) return 'hasChatsWithStories';
         return 'hasChats';
-    }, [isLoading, chats.length, stories.length, storiesHidden]);
+    }, [connectionsLoading, chats.length, stories.length, storiesHidden]);
 
     // Filter counts (derived from data)
     const filterCounts = useMemo(() => ({
@@ -58,8 +73,9 @@ export default function ChatsScreen() {
     };
 
     const handleChatPress = (chatId: string) => {
-        // TODO: Navigate to chat conversation
-        console.log('Navigate to chat:', chatId);
+        // Navigate to chat conversation
+        // TODO: Create chat route first
+        console.log('Open chat with:', chatId);
     };
 
     const handleAddPress = () => {
@@ -184,3 +200,4 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.xxl,
     },
 });
+
